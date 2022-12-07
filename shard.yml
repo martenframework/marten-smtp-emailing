@@ -1,0 +1,26 @@
+name: marten_smtp_emailing
+version: 0.1.0.dev
+
+authors:
+  - Morgan Aubert <me@morganaubert.name>
+
+description: |
+  An SMTP emailing backend for the Marten web framework.
+
+crystal: ">= 1.4.0"
+
+dependencies:
+  email:
+    github: arcage/crystal-email
+  marten:
+    github: martenframework/marten
+    branch: main
+
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 1.1.0
+  devmail:
+    github: tijn/devmail
+
+license: MIT
