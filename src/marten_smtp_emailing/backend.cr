@@ -34,12 +34,14 @@ module MartenSMTPEmailing
           email_bcc.each { |bcc_address| bcc(bcc_address.address, bcc_address.name) }
         end
 
+        unless (reply_to = email.reply_to).nil?
+          reply_to(reply_to.address, reply_to.name)
+        end
+
         email.headers.each do |key, value|
           case key.downcase
           when "message-id"
             message_id(value)
-          when "reply-to"
-            reply_to(value)
           when "return-path"
             return_path(value)
           when "sender"
