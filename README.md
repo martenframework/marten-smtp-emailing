@@ -19,7 +19,13 @@ And run `shards install` afterward.
 
 ## Configuration
 
-Once installed you can configure your project to use the SMTP backend by setting the corresponding configuration option as follows:
+First, add the following requirement to your project's `src/project.cr` file:
+
+```crystal
+require "marten_smtp_emailing"
+```
+
+You can then configure your project to use the SMTP backend by setting the corresponding configuration option as follows:
 
 ```crystal
 Marten.configure do |config|
