@@ -3,7 +3,7 @@
 [![CI](https://github.com/martenframework/marten-smtp-emailing/workflows/Specs/badge.svg)](https://github.com/martenframework/marten-smtp-emailing/actions)
 [![CI](https://github.com/martenframework/marten-smtp-emailing/workflows/QA/badge.svg)](https://github.com/martenframework/marten-smtp-emailing/actions)
 
-**Marten SMTP Emailing** provides an SMTP backend that can be used with Marten web framework's emailing system. 
+**Marten SMTP Emailing** provides an SMTP backend that can be used with Marten web framework's [emailing system](https://martenframework.com/docs/next/emailing).
 
 ## Installation
 
