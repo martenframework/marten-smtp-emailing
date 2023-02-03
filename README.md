@@ -51,7 +51,7 @@ end
 ## Authors
 
 Morgan Aubert ([@ellmetha](https://github.com/ellmetha)) and 
-[contributors](https://github.com/martenframework/marten/contributors).
+[contributors](https://github.com/martenframework/marten-smtp-emailing/contributors).
 
 ## License
 
