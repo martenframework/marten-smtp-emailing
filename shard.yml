@@ -1,5 +1,5 @@
 name: marten_smtp_emailing
-version: 0.1.0.dev
+version: 0.1.0
 
 authors:
   - Morgan Aubert <me@morganaubert.name>
@@ -14,7 +14,7 @@ dependencies:
     github: arcage/crystal-email
   marten:
     github: martenframework/marten
-    branch: main
+    version: ">= 0.2.0"
 
 development_dependencies:
   ameba:
