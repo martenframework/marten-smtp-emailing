@@ -15,6 +15,7 @@ jobs:
         crystal: [
           '1.6.2',
           '1.7.3',
+          '1.8.0',
           'nightly',
         ]
     container:
