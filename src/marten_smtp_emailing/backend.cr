@@ -22,7 +22,10 @@ module MartenSMTPEmailing
 
     def deliver(email : Marten::Emailing::Email) : Nil
       ::EMail.send(smtp_config) do
-        subject(email.subject)
+        unless (email_subject = email.subject).nil?
+          subject(email_subject)
+        end
+
         from(email.from.address, email.from.name)
         email.to.each { |to_address| to(to_address.address, to_address.name) }
 
