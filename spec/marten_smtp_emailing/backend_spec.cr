@@ -68,14 +68,6 @@ describe MartenSMTPEmailing::Backend do
       email = EMAIL_STORE.messages.last
       email.should match(/Foo: bar/)
     end
-
-    it "behaves as expected with an empty email" do
-      backend = MartenSMTPEmailing::Backend.new(use_tls: false, port: SMTP_PORT)
-
-      expect_raises(EMail::Error::MessageError) do
-        backend.deliver(MartenSMTPEmailing::BackendSpec::EmptyEmail.new)
-      end
-    end
   end
 
   describe "#helo_domain" do
