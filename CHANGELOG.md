@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 (UNDER DEVELOPMENT)
+## 0.1.1 (2024-03-13)
 
 * Fix possible compilation errors occurring with empty emails.
 
