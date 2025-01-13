@@ -15,8 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         crystal: [
-          '1.12.2',
           '1.13.0',
+          '1.14.0',
           '1.15.0',
           'nightly',
         ]
