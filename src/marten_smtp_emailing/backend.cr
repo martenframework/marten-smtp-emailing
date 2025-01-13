@@ -16,7 +16,7 @@ module MartenSMTPEmailing
       @helo_domain : String = "localhost",
       @use_tls : Bool = true,
       @username : String? = nil,
-      @password : String? = nil
+      @password : String? = nil,
     )
     end
 
