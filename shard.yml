@@ -19,7 +19,6 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
-    branch: master
   devmail:
     github: tijn/devmail
 
