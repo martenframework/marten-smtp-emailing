@@ -68,6 +68,17 @@ describe MartenSMTPEmailing::Backend do
       email = EMAIL_STORE.messages.last
       email.should match(/Foo: bar/)
     end
+
+    it "sends an email with attachments as expected" do
+      backend = MartenSMTPEmailing::Backend.new(use_tls: false, port: SMTP_PORT)
+      backend.deliver(MartenSMTPEmailing::BackendSpec::TestEmailWithAttachment.new)
+
+      EMAIL_STORE.count.should eq 1
+      email = EMAIL_STORE.messages.last
+      email.should match(/Content-Type: text\/plain; name=/)
+      email.should match(/Content-Disposition: attachment; filename\*0\*=UTF-8''test_attachment\.txt/)
+      email.should match(/QXR0YWNobWVudCBjb250ZW50/)
+    end
   end
 
   describe "#helo_domain" do
@@ -178,6 +189,12 @@ module MartenSMTPEmailing::BackendSpec
 
     def headers
       @headers
+    end
+  end
+
+  class TestEmailWithAttachment < TestEmail
+    def initialize
+      attach(IO::Memory.new("Attachment content"), filename: "test_attachment.txt")
     end
   end
 end
