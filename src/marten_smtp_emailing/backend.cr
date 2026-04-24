@@ -61,6 +61,10 @@ module MartenSMTPEmailing
         unless (html_body = email.html_body).nil?
           message_html(html_body)
         end
+
+        email.attachments.each do |attachment|
+          attach(IO::Memory.new(attachment.content), file_name: attachment.filename, mime_type: attachment.mime_type)
+        end
       end
     end
 
