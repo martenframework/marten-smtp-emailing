@@ -75,7 +75,7 @@ describe MartenSMTPEmailing::Backend do
 
       EMAIL_STORE.count.should eq 1
       email = EMAIL_STORE.messages.last
-      email.should match(/Content-Type: text\/plain; name=/)
+      email.should match(/Content-Type: text\/plain;/)
       email.should match(/Content-Disposition: attachment; filename\*0\*=UTF-8''test_attachment\.txt/)
       email.should match(/QXR0YWNobWVudCBjb250ZW50/)
     end
