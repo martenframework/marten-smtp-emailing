@@ -79,6 +79,22 @@ describe MartenSMTPEmailing::Backend do
       email.should match(/Content-Disposition: attachment; filename\*0\*=UTF-8''test_attachment\.txt/)
       email.should match(/QXR0YWNobWVudCBjb250ZW50/)
     end
+
+    it "raises DeliveryError when the SMTP handshake fails instead of silently reporting success" do
+      # Auth configured but no TLS: the client's smtp_auth returns false WITHOUT
+      # raising (`AUTH command cannot be used without TLS`) — the same silent
+      # connect/auth-phase failure class as a real `535` — so the message is
+      # never sent. deliver must surface this, not swallow it.
+      backend = MartenSMTPEmailing::Backend.new(
+        use_tls: false, port: SMTP_PORT, username: "user", password: "pass"
+      )
+
+      expect_raises(MartenSMTPEmailing::DeliveryError) do
+        backend.deliver(MartenSMTPEmailing::BackendSpec::TestEmail.new)
+      end
+
+      EMAIL_STORE.count.should eq 0
+    end
   end
 
   describe "#helo_domain" do

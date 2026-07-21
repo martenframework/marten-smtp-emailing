@@ -1,4 +1,12 @@
 module MartenSMTPEmailing
+  # Raised when an SMTP delivery does not succeed — a failed connection, a
+  # rejected HELO/STARTTLS/AUTH handshake, or a message the server refuses.
+  # crystal-email surfaces several of these as a `false` result rather than an
+  # exception, so `Backend#deliver` translates any non-success into this error
+  # so callers (e.g. a queued delivery job) can retry instead of recording a
+  # send that never happened.
+  class DeliveryError < Exception; end
+
   # An SMTP emailing backend.
   class Backend < Marten::Emailing::Backend::Base
     @smtp_config : EMail::Client::Config?
@@ -21,51 +29,76 @@ module MartenSMTPEmailing
     end
 
     def deliver(email : Marten::Emailing::Email) : Nil
-      ::EMail.send(smtp_config) do
-        unless (email_subject = email.subject).nil?
-          subject(email_subject)
-        end
+      message = build_message(email)
 
-        from(email.from.address, email.from.name)
-        email.to.each { |to_address| to(to_address.address, to_address.name) }
+      # Drive the client directly rather than via the `EMail.send` helper so the
+      # `EMail::Client#send` boolean is observable. On a failed handshake
+      # (connection / HELO / STARTTLS / AUTH) `start` logs and returns without
+      # ever running this block, so `sent` stays false; on a message the server
+      # rejects, `send` itself returns false. Either way we raise instead of
+      # silently reporting success — see `DeliveryError`.
+      sent = false
+      ::EMail::Client.new(smtp_config).start do
+        sent = send(message)
+      end
 
-        unless (email_cc = email.cc).nil?
-          email_cc.each { |cc_address| cc(cc_address.address, cc_address.name) }
-        end
+      unless sent
+        raise DeliveryError.new("SMTP delivery failed to #{email.to.map(&.address).join(", ")}")
+      end
+    end
 
-        unless (email_bcc = email.bcc).nil?
-          email_bcc.each { |bcc_address| bcc(bcc_address.address, bcc_address.name) }
-        end
+    private def build_message(email : Marten::Emailing::Email) : ::EMail::Message
+      message = ::EMail::Message.new
 
-        unless (reply_to = email.reply_to).nil?
-          reply_to(reply_to.address, reply_to.name)
-        end
+      unless (email_subject = email.subject).nil?
+        message.subject(email_subject)
+      end
 
-        email.headers.each do |key, value|
-          case key.downcase
-          when "message-id"
-            message_id(value)
-          when "return-path"
-            return_path(value)
-          when "sender"
-            sender(value)
-          else
-            custom_header(key, value)
-          end
-        end
+      message.from(email.from.address, email.from.name)
+      email.to.each { |to_address| message.to(to_address.address, to_address.name) }
 
-        unless (text_body = email.text_body).nil?
-          message(text_body)
-        end
+      unless (email_cc = email.cc).nil?
+        email_cc.each { |cc_address| message.cc(cc_address.address, cc_address.name) }
+      end
 
-        unless (html_body = email.html_body).nil?
-          message_html(html_body)
-        end
+      unless (email_bcc = email.bcc).nil?
+        email_bcc.each { |bcc_address| message.bcc(bcc_address.address, bcc_address.name) }
+      end
 
-        email.attachments.each do |attachment|
-          attach(IO::Memory.new(attachment.content), file_name: attachment.filename, mime_type: attachment.mime_type)
+      unless (reply_to = email.reply_to).nil?
+        message.reply_to(reply_to.address, reply_to.name)
+      end
+
+      email.headers.each do |key, value|
+        case key.downcase
+        when "message-id"
+          message.message_id(value)
+        when "return-path"
+          message.return_path(value)
+        when "sender"
+          message.sender(value)
+        else
+          message.custom_header(key, value)
         end
       end
+
+      unless (text_body = email.text_body).nil?
+        message.message(text_body)
+      end
+
+      unless (html_body = email.html_body).nil?
+        message.message_html(html_body)
+      end
+
+      email.attachments.each do |attachment|
+        message.attach(
+          IO::Memory.new(attachment.content),
+          file_name: attachment.filename,
+          mime_type: attachment.mime_type,
+        )
+      end
+
+      message
     end
 
     private def auth
