@@ -14,8 +14,6 @@ dependencies:
     github: arcage/crystal-email
   marten:
     github: martenframework/marten
-    # Version-style requirement (not branch: main) so downstream apps that
-    # also depend on marten via version requirements can unify resolution.
     version: ">= 0.2.0"
 
 development_dependencies:

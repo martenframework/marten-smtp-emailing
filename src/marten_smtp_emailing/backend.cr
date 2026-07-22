@@ -1,10 +1,6 @@
 module MartenSMTPEmailing
-  # Raised when an SMTP delivery does not succeed — a failed connection, a
-  # rejected HELO/STARTTLS/AUTH handshake, or a message the server refuses.
-  # crystal-email surfaces several of these as a `false` result rather than an
-  # exception, so `Backend#deliver` translates any non-success into this error
-  # so callers (e.g. a queued delivery job) can retry instead of recording a
-  # send that never happened.
+  # Raised when SMTP delivery fails: a failed connection or handshake, or a
+  # message the server rejects.
   class DeliveryError < Exception; end
 
   # An SMTP emailing backend.
@@ -31,12 +27,8 @@ module MartenSMTPEmailing
     def deliver(email : Marten::Emailing::Email) : Nil
       message = build_message(email)
 
-      # Drive the client directly rather than via the `EMail.send` helper so the
-      # `EMail::Client#send` boolean is observable. On a failed handshake
-      # (connection / HELO / STARTTLS / AUTH) `start` logs and returns without
-      # ever running this block, so `sent` stays false; on a message the server
-      # rejects, `send` itself returns false. Either way we raise instead of
-      # silently reporting success — see `DeliveryError`.
+      # `EMail::Client#start` swallows connection/handshake errors (the block
+      # never runs) and `#send` returns false on rejection — neither raises.
       sent = false
       ::EMail::Client.new(smtp_config).start do
         sent = send(message)

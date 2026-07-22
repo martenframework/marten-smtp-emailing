@@ -81,10 +81,8 @@ describe MartenSMTPEmailing::Backend do
     end
 
     it "raises DeliveryError when the SMTP handshake fails instead of silently reporting success" do
-      # Auth configured but no TLS: the client's smtp_auth returns false WITHOUT
-      # raising (`AUTH command cannot be used without TLS`) — the same silent
-      # connect/auth-phase failure class as a real `535` — so the message is
-      # never sent. deliver must surface this, not swallow it.
+      # Auth without TLS makes crystal-email fail the AUTH phase silently,
+      # without raising.
       backend = MartenSMTPEmailing::Backend.new(
         use_tls: false, port: SMTP_PORT, username: "user", password: "pass"
       )
