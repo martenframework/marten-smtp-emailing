@@ -3,6 +3,7 @@
 ## 0.2.0 (UNDER DEVELOPMENT)
 
 * Add support for attachments.
+* Raise `Backend::DeliveryError` when SMTP delivery fails instead of silently reporting success.
 
 ## 0.1.1 (2024-03-13)
 

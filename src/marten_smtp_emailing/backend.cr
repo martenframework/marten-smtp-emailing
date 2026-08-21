@@ -1,10 +1,10 @@
 module MartenSMTPEmailing
-  # Raised when SMTP delivery fails: a failed connection or handshake, or a
-  # message the server rejects.
-  class DeliveryError < Exception; end
-
   # An SMTP emailing backend.
   class Backend < Marten::Emailing::Backend::Base
+    # Raised when SMTP delivery fails: a failed connection or handshake, or a
+    # message the server rejects.
+    class DeliveryError < Exception; end
+
     @smtp_config : EMail::Client::Config?
 
     getter host
@@ -26,17 +26,22 @@ module MartenSMTPEmailing
 
     def deliver(email : Marten::Emailing::Email) : Nil
       message = build_message(email)
+      error_message = "SMTP delivery failed to #{email.to.map(&.address).join(", ")}"
 
-      # `EMail::Client#start` swallows connection/handshake errors (the block
-      # never runs) and `#send` returns false on rejection — neither raises.
+      # `EMail::Client#start` does not yield on a failed handshake, and `#send`
+      # returns false on rejection. Connection errors are re-raised via the
+      # default `on_fatal_error` handler; wrap them so callers only rescue
+      # `DeliveryError`.
       sent = false
-      ::EMail::Client.new(smtp_config).start do
-        sent = send(message)
+      begin
+        ::EMail::Client.new(smtp_config).start do
+          sent = send(message)
+        end
+      rescue ex
+        raise DeliveryError.new(error_message, cause: ex)
       end
 
-      unless sent
-        raise DeliveryError.new("SMTP delivery failed to #{email.to.map(&.address).join(", ")}")
-      end
+      raise DeliveryError.new(error_message) unless sent
     end
 
     private def build_message(email : Marten::Emailing::Email) : ::EMail::Message

@@ -87,10 +87,21 @@ describe MartenSMTPEmailing::Backend do
         use_tls: false, port: SMTP_PORT, username: "user", password: "pass"
       )
 
-      expect_raises(MartenSMTPEmailing::DeliveryError) do
+      expect_raises(MartenSMTPEmailing::Backend::DeliveryError) do
         backend.deliver(MartenSMTPEmailing::BackendSpec::TestEmail.new)
       end
 
+      EMAIL_STORE.count.should eq 0
+    end
+
+    it "raises DeliveryError wrapping the original exception when the SMTP connection fails" do
+      backend = MartenSMTPEmailing::Backend.new(use_tls: false, host: "127.0.0.1", port: 1)
+
+      exception = expect_raises(MartenSMTPEmailing::Backend::DeliveryError) do
+        backend.deliver(MartenSMTPEmailing::BackendSpec::TestEmail.new)
+      end
+
+      exception.cause.should_not be_nil
       EMAIL_STORE.count.should eq 0
     end
   end

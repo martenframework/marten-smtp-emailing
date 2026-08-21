@@ -48,6 +48,8 @@ Marten.configure do |config|
 end
 ```
 
+If delivery fails (connection error, handshake failure, or a rejected message), `#deliver` raises `MartenSMTPEmailing::Backend::DeliveryError`. Underlying connection exceptions are available as the error's `#cause`.
+
 ## Authors
 
 Morgan Aubert ([@ellmetha](https://github.com/ellmetha)) and 
